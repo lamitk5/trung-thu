@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trung Thu — Kịch Giấy Nhiều Lớp</title>
+  <meta name="description" content="3D Paper-Cutout Shadowbox Theater for Mid-Autumn Festival" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23E8B84B'/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Cinzel:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./css/main.css?v=14" />
+</head>
+
+<body>
+  <div id="app">
+    <canvas id="stage" aria-label="Sân khấu Trung Thu 3D"></canvas>
+    <div id="vignette" aria-hidden="true"></div>
+    <div id="grain" aria-hidden="true"></div>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         IMPERIAL CHINESE PALACE DOORS (Cổng Cung Đình Sơn Son Thếp Vàng)
+         Two mirrored lacquered wooden doors that slide open on click.
+    ════════════════════════════════════════════════════════════════════ -->
+    <div id="curtain-layer" class="curtain-layer">
+
+      <!-- ── LEFT DOOR PANEL ── -->
+      <div class="curtain-panel curtain-left" id="curtain-left">
+        <!-- Rice paper backlit glow behind the lattice -->
+        <div class="door-paper-glow"></div>
+        <svg class="door-svg" viewBox="0 0 500 1000" preserveAspectRatio="xMidYMid slice"
+             xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <!-- Wood bevel gradient (light from top-left) -->
+            <linearGradient id="woodL" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%"   stop-color="#9e2030"/>
+              <stop offset="18%"  stop-color="#6b1016"/>
+              <stop offset="55%"  stop-color="#4e0c11"/>
+              <stop offset="85%"  stop-color="#3a060a"/>
+              <stop offset="100%" stop-color="#2a0408"/>
+            </linearGradient>
+            <!-- Raised molding highlight -->
+            <linearGradient id="molding" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%"   stop-color="#b02535"/>
+              <stop offset="40%"  stop-color="#8f1a23"/>
+              <stop offset="100%" stop-color="#3a060a"/>
+            </linearGradient>
+            <!-- Paper glow fill for lattice interior -->
+            <radialGradient id="paperGlow" cx="50%" cy="45%" r="55%">
+              <stop offset="0%"   stop-color="#fff6db" stop-opacity="1"/>
+              <stop offset="60%"  stop-color="#fae19c" stop-opacity="0.92"/>
+              <stop offset="100%" stop-color="#e0b457" stop-opacity="0.72"/>
+            </radialGradient>
+          </defs>
+
+          <!-- ── OUTER DOOR BODY ── -->
+          <rect x="0" y="0" width="500" height="1000" fill="url(#woodL)"/>
+
+          <!-- Outer gold filigree border -->
+          <rect x="6"  y="6"  width="488" height="988" fill="none" stroke="#d4af37" stroke-width="5" rx="2"/>
+          <rect x="14" y="14" width="472" height="972" fill="none" stroke="#8f6010" stroke-width="2" rx="1"/>
+          <rect x="18" y="18" width="464" height="964" fill="none" stroke="#d4af37" stroke-width="1.5" opacity="0.55" rx="1"/>
+
+          <!-- ══════════════════════════════════════
+               ZONE 1 — TOP TRANSOM (y 28 → 148)
+          ══════════════════════════════════════ -->
+          <!-- Transom frame -->
+          <rect x="28" y="28" width="444" height="120" fill="url(#molding)" rx="3"/>
+          <rect x="36" y="36" width="428" height="104" fill="none" stroke="#d4af37" stroke-width="2.5" rx="2"/>
+          <rect x="44" y="44" width="412" height="88"  fill="#3a060a" rx="1"/>
+          <rect x="52" y="52" width="396" height="72"  fill="none" stroke="#d4af37" stroke-width="1.5" rx="1"/>
+
+          <!-- Transom center: horizontal bar with two flanking diamonds -->
+          <line x1="56" y1="88" x2="444" y2="88" stroke="#d4af37" stroke-width="2"/>
+          <!-- Left diamond cluster -->
+          <polygon points="110,72  126,88  110,104  94,88"  fill="none" stroke="#d4af37" stroke-width="2"/>
+          <circle  cx="110" cy="88" r="5" fill="#d4af37"/>
+          <!-- Center elongated rectangle motif -->
+          <rect x="178" y="60" width="144" height="56" fill="none" stroke="#d4af37" stroke-width="2" rx="1"/>
+          <rect x="188" y="68" width="124" height="40" fill="none" stroke="#d4af37" stroke-width="1" opacity="0.7" rx="1"/>
+          <line x1="250" y1="60" x2="250" y2="116" stroke="#d4af37" stroke-width="1.5" opacity="0.6"/>
+          <!-- Right diamond cluster -->
+          <polygon points="390,72  406,88  390,104  374,88" fill="none" stroke="#d4af37" stroke-width="2"/>
+          <circle  cx="390" cy="88" r="5" fill="#d4af37"/>
+
+          <!-- ══════════════════════════════════════
+               ZONE 2 — CENTER LATTICE (y 148 → 698)
+               Nested Stepped-Rectangle + Octagon motif
+          ══════════════════════════════════════ -->
+          <!-- Lattice outer frame -->
+          <rect x="28"  y="148" width="444" height="550" fill="url(#molding)"/>
+          <!-- Rice paper glow INSIDE lattice -->
+          <rect x="40"  y="158" width="420" height="530" fill="url(#paperGlow)" opacity="0.88"/>
+
+          <!-- Heavy outer frame border of lattice zone -->
+          <rect x="36"  y="156" width="428" height="534" fill="none" stroke="#d4af37" stroke-width="3"/>
+          <rect x="44"  y="164" width="412" height="518" fill="none" stroke="#8f6010" stroke-width="1.5"/>
+
+          <!-- ─── NESTED RECTANGLE / OCTAGON MOTIF ───
+               Mathematically centered in 500×550 lattice zone.
+               Center: cx=250, cy=423  (148 + 550/2 = 423)
+               Outermost rect: 380×480 → inset 40px each side from 44,164
+          ─── -->
+          <!-- Step 1: Outer heavy rectangle -->
+          <rect x="52"  y="172" width="396" height="502" fill="none" stroke="#d4af37" stroke-width="4"/>
+
+          <!-- Step 2: 45° corner cuts → octagon shape via polygon -->
+          <!-- Octagon: cut 52px corners from rect (52,172)–(448,674) -->
+          <polygon
+            points="104,172  396,172
+                    448,224  448,622
+                    396,674  104,674
+                    52,622   52,224"
+            fill="none" stroke="#d4af37" stroke-width="3.5"/>
+
+          <!-- Step 3: Inner stepped rectangle (inset 44px from octagon sides) -->
+          <polygon
+            points="148,216  352,216
+                    404,268  404,578
+                    352,630  148,630
+                     96,578   96,268"
+            fill="none" stroke="#d4af37" stroke-width="2.5"/>
+
+          <!-- Step 4: Inner-inner rectangle (solid centered frame) -->
+          <rect x="116" y="236" width="268" height="374" fill="none" stroke="#d4af37" stroke-width="2"/>
+          <rect x="130" y="250" width="240" height="346" fill="none" stroke="#d4af37" stroke-width="1.2" opacity="0.65"/>
+
+          <!-- Corner connecting struts (45° diagonal) — TOP -->
+          <line x1="52"  y1="224" x2="96"  y2="268" stroke="#d4af37" stroke-width="2.5"/>
+          <line x1="448" y1="224" x2="404" y2="268" stroke="#d4af37" stroke-width="2.5"/>
+          <!-- BOTTOM -->
+          <line x1="52"  y1="622" x2="96"  y2="578" stroke="#d4af37" stroke-width="2.5"/>
+          <line x1="448" y1="622" x2="404" y2="578" stroke="#d4af37" stroke-width="2.5"/>
+
+          <!-- Horizontal cross struts inside octagon zone -->
+          <line x1="52"  y1="423" x2="96"  y2="423" stroke="#d4af37" stroke-width="2" opacity="0.7"/>
+          <line x1="404" y1="423" x2="448" y2="423" stroke="#d4af37" stroke-width="2" opacity="0.7"/>
+          <!-- Vertical cross struts -->
+          <line x1="250" y1="172" x2="250" y2="216" stroke="#d4af37" stroke-width="2" opacity="0.7"/>
+          <line x1="250" y1="630" x2="250" y2="674" stroke="#d4af37" stroke-width="2" opacity="0.7"/>
+          <line x1="250" y1="236" x2="250" y2="250" stroke="#d4af37" stroke-width="1.5" opacity="0.5"/>
+          <line x1="250" y1="596" x2="250" y2="610" stroke="#d4af37" stroke-width="1.5" opacity="0.5"/>
+
+          <!-- Center medallion inside the inner rect -->
+          <circle cx="250" cy="423" r="42" fill="none" stroke="#d4af37" stroke-width="2.5"/>
+          <circle cx="250" cy="423" r="30" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+          <circle cx="250" cy="423" r="10" fill="#d4af37" opacity="0.85"/>
+          <!-- 4 short spokes -->
+          <line x1="250" y1="381" x2="250" y2="393" stroke="#d4af37" stroke-width="2"/>
+          <line x1="250" y1="453" x2="250" y2="465" stroke="#d4af37" stroke-width="2"/>
+          <line x1="208" y1="423" x2="220" y2="423" stroke="#d4af37" stroke-width="2"/>
+          <line x1="280" y1="423" x2="292" y2="423" stroke="#d4af37" stroke-width="2"/>
+
+          <!-- Corner accent dots -->
+          <circle cx="116" cy="236" r="5" fill="#d4af37"/>
+          <circle cx="384" cy="236" r="5" fill="#d4af37"/>
+          <circle cx="116" cy="610" r="5" fill="#d4af37"/>
+          <circle cx="384" cy="610" r="5" fill="#d4af37"/>
+
+          <!-- ══════════════════════════════════════
+               ZONE 3 — BOTTOM SOLID PANEL (y 698 → 982)
+          ══════════════════════════════════════ -->
+          <!-- Solid panel background -->
+          <rect x="28" y="698" width="444" height="284" fill="#3a060a"/>
+
+          <!-- Double recessed molding — outer -->
+          <rect x="36"  y="706" width="428" height="268" fill="none" stroke="#d4af37" stroke-width="3" rx="2"/>
+          <!-- Bevel shadow inner lip -->
+          <rect x="48"  y="718" width="404" height="244" fill="#4e0c11" rx="1"/>
+          <!-- Inner molding frame -->
+          <rect x="58"  y="728" width="384" height="224" fill="none" stroke="#d4af37" stroke-width="1.8" rx="1"/>
+          <rect x="68"  y="738" width="364" height="204" fill="none" stroke="#8f6010" stroke-width="1" rx="1"/>
+
+          <!-- Embossed gold cloud badge — center bottom panel (cx=250, cy=840) -->
+          <!-- Outer ring -->
+          <circle cx="250" cy="840" r="52" fill="none" stroke="#d4af37" stroke-width="2.5"/>
+          <!-- Inner ruyi cloud motif (4 cloud lobes + center) -->
+          <circle cx="250" cy="818" r="18" fill="none" stroke="#d4af37" stroke-width="2"/>
+          <circle cx="250" cy="862" r="18" fill="none" stroke="#d4af37" stroke-width="2"/>
+          <circle cx="228" cy="840" r="18" fill="none" stroke="#d4af37" stroke-width="2"/>
+          <circle cx="272" cy="840" r="18" fill="none" stroke="#d4af37" stroke-width="2"/>
+          <circle cx="250" cy="840" r="12" fill="#d4af37" opacity="0.6"/>
+          <circle cx="250" cy="840" r="5"  fill="#d4af37"/>
+
+          <!-- Panel corner filigree squares -->
+          <rect x="76"  y="746" width="18" height="18" fill="none" stroke="#d4af37" stroke-width="1.5" rx="1"/>
+          <rect x="406" y="746" width="18" height="18" fill="none" stroke="#d4af37" stroke-width="1.5" rx="1"/>
+          <rect x="76"  y="920" width="18" height="18" fill="none" stroke="#d4af37" stroke-width="1.5" rx="1"/>
+          <rect x="406" y="920" width="18" height="18" fill="none" stroke="#d4af37" stroke-width="1.5" rx="1"/>
+
+          <!-- ── DOOR SEAM EDGE (right side of left door) ── -->
+          <rect x="490" y="0" width="10" height="1000" fill="#1a0305"/>
+          <!-- Hinge bolts -->
+          <circle cx="24" cy="200" r="10" fill="#8f6010" stroke="#d4af37" stroke-width="2"/>
+          <circle cx="24" cy="800" r="10" fill="#8f6010" stroke="#d4af37" stroke-width="2"/>
+        </svg>
+      </div>
+
+      <!-- ── RIGHT DOOR PANEL (mirror of left, hinge on right) ── -->
+      <div class="curtain-panel curtain-right" id="curtain-right">
+        <div class="door-paper-glow"></div>
+        <svg class="door-svg" viewBox="0 0 500 1000" preserveAspectRatio="xMidYMid slice"
+             xmlns="http://www.w3.org/2000/svg" style="transform:scaleX(-1)">
+          <defs>
+            <linearGradient id="woodR" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%"   stop-color="#9e2030"/>
+              <stop offset="18%"  stop-color="#6b1016"/>
+              <stop offset="55%"  stop-color="#4e0c11"/>
+              <stop offset="85%"  stop-color="#3a060a"/>
+              <stop offset="100%" stop-color="#2a0408"/>
+            </linearGradient>
+            <linearGradient id="moldingR" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%"   stop-color="#b02535"/>
+              <stop offset="40%"  stop-color="#8f1a23"/>
+              <stop offset="100%" stop-color="#3a060a"/>
+            </linearGradient>
+            <radialGradient id="paperGlowR" cx="50%" cy="45%" r="55%">
+              <stop offset="0%"   stop-color="#fff6db" stop-opacity="1"/>
+              <stop offset="60%"  stop-color="#fae19c" stop-opacity="0.92"/>
+              <stop offset="100%" stop-color="#e0b457" stop-opacity="0.72"/>
+            </radialGradient>
+          </defs>
+
+          <rect x="0" y="0" width="500" height="1000" fill="url(#woodR)"/>
+          <rect x="6"  y="6"  width="488" height="988" fill="none" stroke="#d4af37" stroke-width="5" rx="2"/>
+          <rect x="14" y="14" width="472" height="972" fill="none" stroke="#8f6010" stroke-width="2" rx="1"/>
+          <rect x="18" y="18" width="464" height="964" fill="none" stroke="#d4af37" stroke-width="1.5" opacity="0.55" rx="1"/>
+
+          <!-- ZONE 1 TRANSOM -->
+          <rect x="28" y="28" width="444" height="120" fill="url(#moldingR)" rx="3"/>
+          <rect x="36" y="36" width="428" height="104" fill="none" stroke="#d4af37" stroke-width="2.5" rx="2"/>
+          <rect x="44" y="44" width="412" height="88"  fill="#3a060a" rx="1"/>
+          <rect x="52" y="52" width="396" height="72"  fill="none" stroke="#d4af37" stroke-width="1.5" rx="1"/>
+          <line x1="56" y1="88" x2="444" y2="88" stroke="#d4af37" stroke-width="2"/>
+          <polygon points="110,72  126,88  110,104  94,88"  fill="none" stroke="#d4af37" stroke-width="2"/>
+          <circle  cx="110" cy="88" r="5" fill="#d4af37"/>
+          <rect x="178" y="60" width="144" height="56" fill="none" stroke="#d4af37" stroke-width="2" rx="1"/>
+          <rect x="188" y="68" width="124" height="40" fill="none" stroke="#d4af37" stroke-width="1" opacity="0.7" rx="1"/>
+          <line x1="250" y1="60" x2="250" y2="116" stroke="#d4af37" stroke-width="1.5" opacity="0.6"/>
+          <polygon points="390,72  406,88  390,104  374,88" fill="none" stroke="#d4af37" stroke-width="2"/>
+          <circle  cx="390" cy="88" r="5" fill="#d4af37"/>
+
+          <!-- ZONE 2 LATTICE -->
+          <rect x="28"  y="148" width="444" height="550" fill="url(#moldingR)"/>
+          <rect x="40"  y="158" width="420" height="530" fill="url(#paperGlowR)" opacity="0.88"/>
+          <rect x="36"  y="156" width="428" height="534" fill="none" stroke="#d4af37" stroke-width="3"/>
+          <rect x="44"  y="164" width="412" height="518" fill="none" stroke="#8f6010" stroke-width="1.5"/>
+          <rect x="52"  y="172" width="396" height="502" fill="none" stroke="#d4af37" stroke-width="4"/>
+          <polygon
+            points="104,172  396,172
+                    448,224  448,622
+                    396,674  104,674
+                    52,622   52,224"
+            fill="none" stroke="#d4af37" stroke-width="3.5"/>
+          <polygon
+            points="148,216  352,216
+                    404,268  404,578
+                    352,630  148,630
+                     96,578   96,268"
+            fill="none" stroke="#d4af37" stroke-width="2.5"/>
+          <rect x="116" y="236" width="268" height="374" fill="none" stroke="#d4af37" stroke-width="2"/>
+          <rect x="130" y="250" width="240" height="346" fill="none" stroke="#d4af37" stroke-width="1.2" opacity="0.65"/>
+          <line x1="52"  y1="224" x2="96"  y2="268" stroke="#d4af37" stroke-width="2.5"/>
+          <line x1="448" y1="224" x2="404" y2="268" stroke="#d4af37" stroke-width="2.5"/>
+          <line x1="52"  y1="622" x2="96"  y2="578" stroke="#d4af37" stroke-width="2.5"/>
+          <line x1="448" y1="622" x2="404" y2="578" stroke="#d4af37" stroke-width="2.5"/>
+          <line x1="52"  y1="423" x2="96"  y2="423" stroke="#d4af37" stroke-width="2" opacity="0.7"/>
+          <line x1="404" y1="423" x2="448" y2="423" stroke="#d4af37" stroke-width="2" opacity="0.7"/>
+          <line x1="250" y1="172" x2="250" y2="216" stroke="#d4af37" stroke-width="2" opacity="0.7"/>
+          <line x1="250" y1="630" x2="250" y2="674" stroke="#d4af37" stroke-width="2" opacity="0.7"/>
+          <line x1="250" y1="236" x2="250" y2="250" stroke="#d4af37" stroke-width="1.5" opacity="0.5"/>
+          <line x1="250" y1="596" x2="250" y2="610" stroke="#d4af37" stroke-width="1.5" opacity="0.5"/>
+          <circle cx="250" cy="423" r="42" fill="none" stroke="#d4af37" stroke-width="2.5"/>
+          <circle cx="250" cy="423" r="30" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+          <circle cx="250" cy="423" r="10" fill="#d4af37" opacity="0.85"/>
+          <line x1="250" y1="381" x2="250" y2="393" stroke="#d4af37" stroke-width="2"/>
+          <line x1="250" y1="453" x2="250" y2="465" stroke="#d4af37" stroke-width="2"/>
+          <line x1="208" y1="423" x2="220" y2="423" stroke="#d4af37" stroke-width="2"/>
+          <line x1="280" y1="423" x2="292" y2="423" stroke="#d4af37" stroke-width="2"/>
+          <circle cx="116" cy="236" r="5" fill="#d4af37"/>
+          <circle cx="384" cy="236" r="5" fill="#d4af37"/>
+          <circle cx="116" cy="610" r="5" fill="#d4af37"/>
+          <circle cx="384" cy="610" r="5" fill="#d4af37"/>
+
+          <!-- ZONE 3 BOTTOM PANEL -->
+          <rect x="28" y="698" width="444" height="284" fill="#3a060a"/>
+          <rect x="36"  y="706" width="428" height="268" fill="none" stroke="#d4af37" stroke-width="3" rx="2"/>
+          <rect x="48"  y="718" width="404" height="244" fill="#4e0c11" rx="1"/>
+          <rect x="58"  y="728" width="384" height="224" fill="none" stroke="#d4af37" stroke-width="1.8" rx="1"/>
+          <rect x="68"  y="738" width="364" height="204" fill="none" stroke="#8f6010" stroke-width="1" rx="1"/>
+          <circle cx="250" cy="840" r="52" fill="none" stroke="#d4af37" stroke-width="2.5"/>
+          <circle cx="250" cy="818" r="18" fill="none" stroke="#d4af37" stroke-width="2"/>
+          <circle cx="250" cy="862" r="18" fill="none" stroke="#d4af37" stroke-width="2"/>
+          <circle cx="228" cy="840" r="18" fill="none" stroke="#d4af37" stroke-width="2"/>
+          <circle cx="272" cy="840" r="18" fill="none" stroke="#d4af37" stroke-width="2"/>
+          <circle cx="250" cy="840" r="12" fill="#d4af37" opacity="0.6"/>
+          <circle cx="250" cy="840" r="5"  fill="#d4af37"/>
+          <rect x="76"  y="746" width="18" height="18" fill="none" stroke="#d4af37" stroke-width="1.5" rx="1"/>
+          <rect x="406" y="746" width="18" height="18" fill="none" stroke="#d4af37" stroke-width="1.5" rx="1"/>
+          <rect x="76"  y="920" width="18" height="18" fill="none" stroke="#d4af37" stroke-width="1.5" rx="1"/>
+          <rect x="406" y="920" width="18" height="18" fill="none" stroke="#d4af37" stroke-width="1.5" rx="1"/>
+
+          <!-- Seam edge + hinges -->
+          <rect x="490" y="0" width="10" height="1000" fill="#1a0305"/>
+          <circle cx="24" cy="200" r="10" fill="#8f6010" stroke="#d4af37" stroke-width="2"/>
+          <circle cx="24" cy="800" r="10" fill="#8f6010" stroke="#d4af37" stroke-width="2"/>
+        </svg>
+      </div>
+
+      <!-- ── TOP BEAM: Red lacquered horizontal lintel ── -->
+      <div class="curtain-valance"></div>
+
+      <!-- ── MOON PLAQUE LOCK — split across seam ── -->
+      <div class="seal-wrap" id="seal-wrap">
+        <!-- Left half of the brass moon plaque (stays on left door visually) -->
+        <div class="latch-half latch-half-l">
+          <svg viewBox="0 0 120 200" xmlns="http://www.w3.org/2000/svg">
+            <!-- Left semicircle of moon plaque -->
+            <path d="M120,20 A100,90 0 0,0 120,180 L120,20 Z" fill="url(#plaqueLGrad)"/>
+            <defs>
+              <radialGradient id="plaqueLGrad" cx="80%" cy="40%" r="70%">
+                <stop offset="0%" stop-color="#fffbe0"/>
+                <stop offset="35%" stop-color="#d4af37"/>
+                <stop offset="75%" stop-color="#a07820"/>
+                <stop offset="100%" stop-color="#6b4c08"/>
+              </radialGradient>
+            </defs>
+            <!-- Border ring left half -->
+            <path d="M120,20 A100,90 0 0,0 120,180" fill="none" stroke="#fffbe0" stroke-width="3"/>
+            <path d="M120,30 A88,78 0 0,0 120,170" fill="none" stroke="#a07820" stroke-width="1.5"/>
+            <!-- Lion ring knocker (left side) -->
+            <circle cx="85" cy="100" r="22" fill="none" stroke="#fffbe0" stroke-width="2.5"/>
+            <circle cx="85" cy="100" r="14" fill="#c8961a" stroke="#fffbe0" stroke-width="1.5"/>
+            <text x="85" y="105" text-anchor="middle" fill="#3a2408" font-size="14" font-family="serif">獅</text>
+            <!-- Vertical divider seam line -->
+            <line x1="120" y1="0" x2="120" y2="200" stroke="#3a060a" stroke-width="3"/>
+          </svg>
+        </div>
+
+        <!-- Button: center text + glow (sits on seam) -->
+        <button type="button" class="golden-seal" id="btn-start" aria-label="Bắt đầu khai màn">
+          <span class="seal-ring"></span>
+          <span class="seal-text">BẮT ĐẦU<br/>KHAI MÀN</span>
+          <span class="seal-flare"></span>
+        </button>
+
+        <!-- Right half of the brass moon plaque -->
+        <div class="latch-half latch-half-r">
+          <svg viewBox="0 0 120 200" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="plaqueRGrad" cx="20%" cy="40%" r="70%">
+                <stop offset="0%" stop-color="#fffbe0"/>
+                <stop offset="35%" stop-color="#d4af37"/>
+                <stop offset="75%" stop-color="#a07820"/>
+                <stop offset="100%" stop-color="#6b4c08"/>
+              </radialGradient>
+            </defs>
+            <!-- Right semicircle -->
+            <path d="M0,20 A100,90 0 0,1 0,180 L0,20 Z" fill="url(#plaqueRGrad)"/>
+            <path d="M0,20 A100,90 0 0,1 0,180" fill="none" stroke="#fffbe0" stroke-width="3"/>
+            <path d="M0,30 A88,78 0 0,1 0,170"  fill="none" stroke="#a07820" stroke-width="1.5"/>
+            <!-- Lion ring knocker (right side) -->
+            <circle cx="35" cy="100" r="22" fill="none" stroke="#fffbe0" stroke-width="2.5"/>
+            <circle cx="35" cy="100" r="14" fill="#c8961a" stroke="#fffbe0" stroke-width="1.5"/>
+            <text x="35" y="105" text-anchor="middle" fill="#3a2408" font-size="14" font-family="serif">獅</text>
+            <!-- Seam line -->
+            <line x1="0" y1="0" x2="0" y2="200" stroke="#3a060a" stroke-width="3"/>
+          </svg>
+        </div>
+
+        <!-- Sub-text below -->
+        <p class="seal-hint">Chạm để mở cổng Cung Trăng</p>
+      </div>
+
+      <canvas id="stardust" width="800" height="800" aria-hidden="true"></canvas>
+    </div>
+
+
+    <!-- Interactive UI after open -->
+    <div id="hud" class="hud hidden">
+      <div class="hud-title">
+        <span class="hud-kicker">TRUNG THU · KỊCH GIẤY</span>
+        <span class="hud-name">Chị Hằng &amp; Cung Trăng</span>
+      </div>
+      <p class="hud-tip">Di chuột tạo hiệu ứng thị sai 3D · Nhấn câu đối mở câu đố · Nhấn Chị Hằng mở Dải Ngân Hà Lời Chúc ✨</p>
+    </div>
+
+    <!-- Riddle modal -->
+    <div id="riddle-modal" class="riddle-modal" hidden>
+      <div class="riddle-backdrop" data-close></div>
+      <article class="riddle-card" role="dialog" aria-modal="true" aria-labelledby="riddle-title">
+        <div class="riddle-crest"></div>
+        <p class="riddle-label" id="riddle-label">CÂU ĐỐ TRUNG THU</p>
+        <h2 class="riddle-title" id="riddle-title"></h2>
+        <p class="riddle-body" id="riddle-body"></p>
+        <div class="riddle-answer-box" id="riddle-answer-box">
+          <button type="button" class="riddle-reveal" id="btn-reveal">Xem đáp án</button>
+          <p class="riddle-answer" id="riddle-answer" hidden></p>
+        </div>
+        <button type="button" class="riddle-close" data-close aria-label="Đóng">✕</button>
+      </article>
+    </div>
+
+    <!-- 3D Floating Wishes Galaxy Container -->
+    <div id="wishes-galaxy" class="wishes-galaxy" aria-label="Dải Ngân Hà Lời Chúc"></div>
+
+    <!-- Centerpiece Celebratory Greeting Card (Modal Popup) -->
+    <div id="celebration-modal" class="celebration-modal" hidden>
+      <div class="celebration-backdrop" data-close-celebration></div>
+      <article class="celebration-card" role="dialog" aria-modal="true" aria-labelledby="celebration-title">
+        <div class="celebration-crest"></div>
+        <div class="celebration-rabbit-badge">
+          <span class="rabbit-icon">🐰</span>
+          <span class="moon-flare">🌕</span>
+        </div>
+        <p class="celebration-subtitle">ĐÊM HỘI TRĂNG RẰM · ĐOÀN VIÊN NHƯ Ý</p>
+        <h2 class="celebration-title" id="celebration-title">🥮 CHÚC MỪNG TẾT TRUNG THU ✨</h2>
+        <div class="celebration-divider"></div>
+        <p class="celebration-message">
+          Thân chúc bạn và gia đình một mùa Tết Trung Thu ấm áp, viên mãn, tràn ngập tiếng cười và vạn sự như ý bên ánh trăng rằm sáng trong!
+        </p>
+        <div class="celebration-wishes-summary">
+          <span>🌸 Hạnh Phúc</span> · <span>🏮 Bình An</span> · <span>✨ May Mắn</span> · <span>💫 Thành Công</span>
+        </div>
+        <div class="celebration-actions">
+          <button type="button" class="btn-celebration-close" data-close-celebration>Đón Nhận Lời Chúc 💖</button>
+        </div>
+        <button type="button" class="celebration-close-corner" data-close-celebration aria-label="Đóng">✕</button>
+      </article>
+    </div>
+  </div>
+
+  <!-- Fixed WebGL Stardust Phoenix Overlay (pointer-events: none, z-index: 9999) -->
+  <canvas id="phoenix-canvas" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999;"></canvas>
+
+  <script src="./vendor/gsap.min.js"></script>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./vendor/three.module.js"
+    }
+  }
+  </script>
+  <script type="module" src="./js/main.js?v=30"></script>
+</body>
+</html>

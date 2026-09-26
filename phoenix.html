@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phượng Hoàng Ánh Sáng — Stardust Phoenix WebGL Overlay</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%2300e1ff'/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Cinzel:wght@600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --gold: #ffe270;
+      --cyan: #00e1ff;
+      --deep-bg: #070a14;
+      --card-bg: rgba(14, 21, 44, 0.7);
+      --border-glow: rgba(0, 225, 255, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Be Vietnam Pro', sans-serif;
+      background-color: var(--deep-bg);
+      color: #e2e8f0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+      background-image: 
+        radial-gradient(circle at 50% 20%, rgba(20, 35, 75, 0.7) 0%, transparent 60%),
+        radial-gradient(circle at 80% 80%, rgba(40, 20, 70, 0.5) 0%, transparent 50%);
+    }
+
+    /* Fixed WebGL Overlay Canvas - Requirement #1 */
+    #phoenix-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Demo website content below overlay */
+    .page-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 6rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.35rem 1rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold);
+      background: rgba(255, 226, 112, 0.1);
+      border: 1px solid rgba(255, 226, 112, 0.3);
+      border-radius: 999px;
+      margin-bottom: 1rem;
+      backdrop-filter: blur(8px);
+    }
+
+    h1 {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      font-weight: 700;
+      background: linear-gradient(135deg, #ffffff 20%, var(--gold) 60%, var(--cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 1rem;
+      letter-spacing: 0.04em;
+    }
+
+    p.lead {
+      font-size: 1.15rem;
+      color: #94a3b8;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    /* Interactive cards proving clickability below overlay */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.75rem;
+      margin-bottom: 3.5rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-glow);
+      border-radius: 16px;
+      padding: 1.75rem;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: var(--cyan);
+      box-shadow: 0 16px 36px rgba(0, 225, 255, 0.2);
+    }
+
+    .card h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.35rem;
+      color: #fff;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card p {
+      color: #cbd5e1;
+      font-size: 0.95rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1.25rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: inherit;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn:hover {
+      background: rgba(0, 225, 255, 0.2);
+      border-color: var(--cyan);
+      color: #fff;
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, #ffe270 0%, #ffaa22 100%);
+      color: #121526;
+      border: none;
+      font-weight: 700;
+    }
+
+    .btn-gold:hover {
+      box-shadow: 0 0 20px rgba(255, 226, 112, 0.6);
+      transform: scale(1.03);
+    }
+
+    /* Floating HUD Control Panel */
+    .hud-controls {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 10000; /* Above overlay so controls are interactive */
+      background: rgba(10, 16, 35, 0.85);
+      border: 1px solid rgba(0, 225, 255, 0.4);
+      border-radius: 18px;
+      padding: 1.25rem 1.5rem;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+      width: 320px;
+    }
+
+    .hud-controls h4 {
+      font-family: 'Cinzel', serif;
+      color: var(--gold);
+      font-size: 1rem;
+      margin-bottom: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .control-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      font-size: 0.88rem;
+    }
+
+    .control-row span {
+      color: #94a3b8;
+    }
+
+    .switch-btn {
+      padding: 0.35rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border: 1px solid rgba(0, 225, 255, 0.3);
+      background: rgba(0, 225, 255, 0.12);
+      color: var(--cyan);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .switch-btn.active {
+      background: var(--cyan);
+      color: #070a14;
+      font-weight: 700;
+      box-shadow: 0 0 12px rgba(0, 225, 255, 0.5);
+    }
+
+    input[type=range] {
+      width: 130px;
+      accent-color: var(--cyan);
+    }
+
+    .hud-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .hud-actions button {
+      flex: 1;
+      padding: 0.5rem;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <!-- Fixed WebGL Overlay Canvas (pointer-events: none, z-index: 9999) -->
+  <canvas id="phoenix-canvas"></canvas>
+
+  <div class="page-container" id="content-container">
+    <header>
+      <span class="badge">Ethereal Three.js WebGL Overlay</span>
+      <h1>Phượng Hoàng Ánh Sáng</h1>
+      <p class="lead">Sinh vật năng lượng vũ trụ lượn bay tự do trên nền trang web. Chế độ lụa hạt năng lượng, vỗ cánh mượt mà và dải đuôi lụa chuyển động vật lý chuỗi.</p>
+    </header>
+
+    <div class="grid">
+      <div class="card">
+        <h3>✨ Thân &amp; Tâm Sáng</h3>
+        <p>Lõi ánh sáng vàng kim tinh khiết phát ra tia hào quang vũ trụ, xung quanh bao phủ quầng sáng màu thiên thanh (celestial cyan) lung linh.</p>
+        <button type="button" class="btn" onclick="alert('Nút bấm dưới lớp overlay hoạt động bình thường nhờ pointer-events: none!')">Thử bấm nút này</button>
+      </div>
+
+      <div class="card">
+        <h3>🪶 Cánh Lưỡi Năng Lượng</h3>
+        <p>Cánh gồm các dải ruy-băng ánh sáng xếp lớp, nhịp đập hình sin tự nhiên với hiệu ứng uốn lượn lan truyền từ gốc ra đầu cánh.</p>
+        <button type="button" class="btn" id="btn-burst-demo">Kích nổ bụi sao</button>
+      </div>
+
+      <div class="card">
+        <h3>🌌 Dải Đuôi Lụa 5 Nhánh</h3>
+        <p>5 dải lụa đuôi chuyển động theo vật lý trailing Verlet chain kết hợp sóng điều hòa, tạo cảm giác lụa bay trong gió mặt trời.</p>
+        <a href="./index.html" class="btn btn-gold">Vào Sân Khấu Trung Thu ➔</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive HUD Controls -->
+  <div class="hud-controls">
+    <h4>
+      <span>Điều Khiển Phượng Hoàng</span>
+      <span style="font-size: 0.75rem; color: #64748b;">WebGL 60FPS</span>
+    </h4>
+
+    <div class="control-row">
+      <span>Bám theo chuột:</span>
+      <button type="button" class="switch-btn active" id="btn-toggle-follow">BẬT</button>
+    </div>
+
+    <div class="control-row">
+      <span>Tốc độ bay:</span>
+      <input type="range" id="slider-speed" min="0.5" max="2.5" step="0.1" value="1.0" />
+      <span id="label-speed" style="min-width: 32px; text-align: right; color: var(--cyan);">1.0x</span>
+    </div>
+
+    <div class="hud-actions">
+      <button type="button" class="btn btn-gold" id="btn-burst">✨ Bắn Bụi Sao</button>
+      <button type="button" class="btn" id="btn-toggle-bg">Ẩn Nội Dung</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { StardustPhoenix } from './js/phoenix.js?v=4';
+
+    // Initialize Stardust Phoenix overlay
+    const phoenix = new StardustPhoenix({
+      canvas: document.getElementById('phoenix-canvas'),
+      mouseFollow: true,
+      speed: 1.0
+    });
+
+    // Wire up HUD Controls
+    const btnToggleFollow = document.getElementById('btn-toggle-follow');
+    btnToggleFollow.addEventListener('click', () => {
+      const active = phoenix.toggleMouseFollow();
+      btnToggleFollow.textContent = active ? 'BẬT' : 'TẮT';
+      btnToggleFollow.classList.toggle('active', active);
+    });
+
+    const sliderSpeed = document.getElementById('slider-speed');
+    const labelSpeed = document.getElementById('label-speed');
+    sliderSpeed.addEventListener('input', (e) => {
+      const val = parseFloat(e.target.value);
+      phoenix.setSpeed(val);
+      labelSpeed.textContent = val.toFixed(1) + 'x';
+    });
+
+    const btnBurst = document.getElementById('btn-burst');
+    btnBurst.addEventListener('click', () => {
+      phoenix.triggerStardustBurst(90);
+    });
+
+    const btnBurstDemo = document.getElementById('btn-burst-demo');
+    btnBurstDemo.addEventListener('click', () => {
+      phoenix.triggerStardustBurst(75);
+    });
+
+    const btnToggleBg = document.getElementById('btn-toggle-bg');
+    const content = document.getElementById('content-container');
+    let contentVisible = true;
+    btnToggleBg.addEventListener('click', () => {
+      contentVisible = !contentVisible;
+      content.style.opacity = contentVisible ? '1' : '0.08';
+      content.style.transition = 'opacity 0.4s ease';
+      btnToggleBg.textContent = contentVisible ? 'Ẩn Nội Dung' : 'Hiện Nội Dung';
+    });
+  </script>
+</body>
+</html>

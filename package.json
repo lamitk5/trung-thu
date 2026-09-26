@@ -1,0 +1,10 @@
+{
+  "name": "trung-thu-paper-theater",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "3D Paper-Cutout Shadowbox Theater for Mid-Autumn Festival",
+  "scripts": {
+    "start": "npx --yes serve -l 4173 ."
+  }
+}
