@@ -18,7 +18,7 @@ import {
   makeRabbitLanternTexture,
 } from "./textures.js?v=14";
 
-import { Fireflies, Embers, Fireworks } from "./particles.js?v=11";
+import { Fireflies, Embers, Fireworks } from "./particles.js?v=12";
 import { playFireworkExplosion } from "./audio.js?v=4";
 
 function canvasTex(canvas) {
@@ -112,14 +112,18 @@ export class PaperStage {
     this.lotusLanterns = [];
     this.goddessPuppet = null;
 
+    const isMobile = window.innerWidth < 768;
     this.renderer = new THREE.WebGLRenderer({
       canvas,
-      antialias: true,
+      antialias: !isMobile && window.devicePixelRatio < 2,
       alpha: false,
       powerPreference: "high-performance",
+      stencil: false,
+      depth: true,
     });
-    // Cap pixel ratio at 1.25 to guarantee silky 60-120 FPS without fill-rate throttling
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
+    // Cap pixel ratio at 1.15 on mobile, 1.25 on desktop for rock-solid 60 FPS
+    const maxPr = isMobile ? 1.15 : 1.25;
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, maxPr));
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setClearColor(0x030612, 1);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -1009,19 +1013,27 @@ export class PaperStage {
     const w = window.innerWidth;
     const h = window.innerHeight;
     this.renderer.setSize(w, h);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+    const maxPr = w < 768 ? 1.15 : 1.25;
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, maxPr));
     this.updateResponsiveLayout();
   }
 
   start() {
+    if (this.isRunning) return;
+    this.isRunning = true;
     const loop = () => {
+      if (!this.isRunning) return;
       this.raf = requestAnimationFrame(loop);
       this.update();
     };
-    loop();
+    this.raf = requestAnimationFrame(loop);
   }
 
   stop() {
-    cancelAnimationFrame(this.raf);
+    this.isRunning = false;
+    if (this.raf) {
+      cancelAnimationFrame(this.raf);
+      this.raf = null;
+    }
   }
 }

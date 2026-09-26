@@ -551,7 +551,7 @@ export class StardustPhoenix {
   // -------------------------------------------------------------
   buildMultiStrandTail() {
     this.tailRibbons = [];
-    const numSegments = 20; // was 32 — fewer vertex writes for 60fps
+    const numSegments = 12; // 12 segments for lightweight 60fps vertex writes
 
 
     // 5 royal trailing ribbons
@@ -612,7 +612,7 @@ export class StardustPhoenix {
   // Continuous glittering sparkles shedding from wingtips and tail
   // -------------------------------------------------------------
   buildSparkleParticleEmitter() {
-    this.maxParticles = 160; // was 350 — reduced for 60fps headroom
+    this.maxParticles = 90; // optimized for rock-solid 60 FPS
 
     this.particlePool = [];
 
@@ -870,7 +870,7 @@ export class StardustPhoenix {
       const { id, length, lateralSpread, phase, width } = mesh.userData;
       const posAttr = mesh.geometry.attributes.position;
       const posArr = posAttr.array;
-      const numSegments = 20; // must match buildMultiStrandTail
+      const numSegments = 12; // must match buildMultiStrandTail
 
 
       for (let i = 0; i <= numSegments; i++) {
@@ -901,20 +901,17 @@ export class StardustPhoenix {
 
   // Continuous emission from wingtips and tail
   emitWingAndTailSparkles(innerFlap) {
-    // Left wingtip sparkle
-    this._scratchA.set(-2.6, innerFlap * 1.4, -0.2).applyQuaternion(this.currentOrientation).add(this.currentPosition);
-    this._scratchC.set((Math.random() - 0.5) * 0.2, (Math.random() - 0.5) * 0.2, (Math.random() - 0.5) * 0.2);
-    this._scratchB.copy(this._vForward).multiplyScalar(-0.25).add(this._scratchC);
-    this.spawnSparkle(this._scratchA, this._scratchB);
-
-    // Right wingtip sparkle
-    this._scratchA.set(2.6, -innerFlap * 1.4, -0.2).applyQuaternion(this.currentOrientation).add(this.currentPosition);
-    this._scratchC.set((Math.random() - 0.5) * 0.2, (Math.random() - 0.5) * 0.2, (Math.random() - 0.5) * 0.2);
-    this._scratchB.copy(this._vForward).multiplyScalar(-0.25).add(this._scratchC);
-    this.spawnSparkle(this._scratchA, this._scratchB);
+    if (Math.random() < 0.65) {
+      const isRight = Math.random() < 0.5;
+      const sign = isRight ? 1 : -1;
+      this._scratchA.set(sign * 2.6, -sign * innerFlap * 1.4, -0.2).applyQuaternion(this.currentOrientation).add(this.currentPosition);
+      this._scratchC.set((Math.random() - 0.5) * 0.15, (Math.random() - 0.5) * 0.15, (Math.random() - 0.5) * 0.15);
+      this._scratchB.copy(this._vForward).multiplyScalar(-0.25).add(this._scratchC);
+      this.spawnSparkle(this._scratchA, this._scratchB);
+    }
 
     // Tail streamer tip sparkles
-    if (Math.random() < 0.55) { // was 0.65 — emit slightly less often for perf
+    if (Math.random() < 0.35) {
       const strandIdx = Math.floor(Math.random() * this.tailRibbons.length);
       const mesh = this.tailRibbons[strandIdx];
       if (mesh) {

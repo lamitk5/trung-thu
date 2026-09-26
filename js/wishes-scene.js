@@ -48,7 +48,8 @@ const FW_PALETTES = [
 
 // ── Main class ─────────────────────────────────────────────────────────────────
 export class WishesScene {
-  constructor() {
+  constructor(options = {}) {
+    this.options     = options;
     this.view        = null;   // The full-screen overlay element
     this.canvas      = null;   // Fireworks canvas
     this.ctx         = null;
@@ -356,7 +357,8 @@ export class WishesScene {
 
   _seedStars() {
     const starsEl = this.view.querySelector('.wgv-stars');
-    for (let i = 0; i < 120; i++) {
+    const count = window.innerWidth < 768 ? 32 : 48;
+    for (let i = 0; i < count; i++) {
       const s = document.createElement('span');
       s.className = 'wgv-star';
       s.style.left   = Math.random() * 100 + '%';
@@ -421,6 +423,9 @@ export class WishesScene {
   show() {
     if (this.visible) return;
     this.visible = true;
+    if (typeof this.options?.onOpen === 'function') {
+      try { this.options.onOpen(); } catch (_) {}
+    }
     this.view.hidden = false;
     this.view.classList.add('visible');
     this.view.style.display = 'flex';
@@ -449,7 +454,10 @@ export class WishesScene {
 
   hide() {
     if (!this.visible) return;
-    this.view.style.transition = 'opacity 0.5s ease';
+    if (typeof this.options?.onClose === 'function') {
+      try { this.options.onClose(); } catch (_) {}
+    }
+    this.view.style.transition = 'opacity 0.4s ease';
     this.view.style.opacity    = '0';
     setTimeout(() => {
       this.visible = false;
@@ -457,7 +465,7 @@ export class WishesScene {
       this.view.classList.remove('visible');
       this.view.style.display = 'none';
       this._stopAll();
-    }, 520);
+    }, 420);
   }
 
   _stopAll() {
@@ -473,7 +481,7 @@ export class WishesScene {
   // ── Wish Rain ─────────────────────────────────────────────────────────────────
   _startWishRain() {
     const isMobile = window.innerWidth < 768;
-    const count    = isMobile ? 7 : 11;
+    const count    = isMobile ? 5 : 8;
     const h        = window.innerHeight;
 
     // Instantly spawn and distribute wishes across the viewport (no waiting delay)
@@ -670,7 +678,7 @@ export class WishesScene {
 
   _burst(cx, cy, palette) {
     const isMobile = window.innerWidth < 768;
-    const n = isMobile ? 65 : 110;
+    const n = isMobile ? 42 : 70;
     const type = Math.random();   // 0-0.5 = circular, 0.5-0.8 = willow, 0.8-1 = glitter
 
     for (let i = 0; i < n; i++) {

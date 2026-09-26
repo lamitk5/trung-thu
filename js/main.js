@@ -1,8 +1,8 @@
-import { PaperStage } from "./scene.js?v=16";
+import { PaperStage } from "./scene.js?v=17";
 import { TheaterUI } from "./ui.js?v=15";
-import { StardustPhoenix } from "./phoenix.js?v=10";
+import { StardustPhoenix } from "./phoenix.js?v=11";
 import { playFairyChime, playWoodLatch, playFireworkExplosion } from "./audio.js?v=4";
-import { WishesScene } from "./wishes-scene.js?v=8";
+import { WishesScene } from "./wishes-scene.js?v=9";
 
 const gsap = window.gsap;
 if (!gsap) {
@@ -23,7 +23,14 @@ const phoenix = new StardustPhoenix({
 stage.phoenix = phoenix;
 
 // Initialize the full-screen Wishes & Fireworks Scene
-const wishesScene = new WishesScene();
+const wishesScene = new WishesScene({
+  onOpen: () => {
+    stage.stop();
+  },
+  onClose: () => {
+    stage.start();
+  },
+});
 
 // Wire the "Đón Nhận Lời Chúc" button in old celebration modal to open wishesScene
 const oldCelebClose = document.querySelector('.btn-celebration-close');
@@ -130,6 +137,15 @@ window.addEventListener("pointerup", (e) => {
 
 gsap.delayedCall(0.5, () => {
   stage.fireworks.burst(-2, 2, -8);
+});
+
+// Pause WebGL rendering when user switches tabs or browser is hidden
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    stage.stop();
+  } else if (!wishesScene.visible) {
+    stage.start();
+  }
 });
 
 console.info("[Trung Thu] Paper stage, Phoenix & Wishes Scene ready ✨");

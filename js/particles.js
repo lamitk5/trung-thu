@@ -22,7 +22,7 @@ function pointsMaterial(map, size, opacity = 1) {
 
 /** Ambient floating golden fireflies */
 export class Fireflies {
-  constructor(scene, count = 80) {
+  constructor(scene, count = 45) {
     this.count = count;
     this.positions = new Float32Array(count * 3);
     this.phases = new Float32Array(count);
@@ -65,7 +65,7 @@ export class Fireflies {
 
 /** Distant floating glowing embers */
 export class Embers {
-  constructor(scene, count = 60) {
+  constructor(scene, count = 35) {
     this.count = count;
     this.positions = new Float32Array(count * 3);
     this.vel = [];
@@ -107,7 +107,7 @@ export class Embers {
  * Bursts behind paper layers; dynamic lights flash for rim illumination.
  */
 export class Fireworks {
-  constructor(scene, { maxParticles = 900 } = {}) {
+  constructor(scene, { maxParticles = 400 } = {}) {
     this.scene = scene;
     this.max = maxParticles;
     this.positions = new Float32Array(maxParticles * 3);
@@ -117,7 +117,7 @@ export class Fireworks {
     this.vel = new Float32Array(maxParticles * 3);
     this.cursor = 0;
     this.bursts = 0;
-    this.nextBurst = 0.4;
+    this.nextBurst = 2.0;
     this.poolLights = [];
 
     for (let i = 0; i < maxParticles; i++) {
@@ -142,7 +142,8 @@ export class Fireworks {
     scene.add(this.points);
 
     for (let i = 0; i < 4; i++) {
-      const light = new THREE.PointLight(0xffaa44, 0, 18, 2);
+      const light = new THREE.PointLight(0xffaa44, 0, 16, 2);
+      light.visible = false;
       scene.add(light);
       this.poolLights.push({ light, t: 0 });
     }
@@ -160,7 +161,7 @@ export class Fireworks {
   }
 
   burst(x = 0, y = 1.5, z = -7) {
-    const n = 55 + Math.floor(Math.random() * 45);
+    const n = 36 + Math.floor(Math.random() * 24);
     const col = this.palette[Math.floor(Math.random() * this.palette.length)];
     for (let i = 0; i < n; i++) {
       const idx = this.cursor;
@@ -175,20 +176,23 @@ export class Fireworks {
 
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(2 * Math.random() - 1);
-      const speed = 1.4 + Math.random() * 2.6;
+      const speed = 1.4 + Math.random() * 2.5;
       this.vel[i3] = Math.sin(phi) * Math.cos(theta) * speed;
       this.vel[i3 + 1] = Math.sin(phi) * Math.sin(theta) * speed;
       this.vel[i3 + 2] = Math.cos(phi) * speed * 0.4;
 
       this.life[idx] = 0;
-      this.maxLife[idx] = 1.2 + Math.random() * 0.9;
+      this.maxLife[idx] = 1.1 + Math.random() * 0.8;
     }
+
+    this.points.geometry.attributes.color.needsUpdate = true;
 
     const slot = this.poolLights[this.lightCursor];
     this.lightCursor = (this.lightCursor + 1) % this.poolLights.length;
     slot.light.position.set(x, y, z + 1.5);
     slot.light.color.setRGB(col[0], col[1], col[2]);
-    slot.light.intensity = 28;
+    slot.light.intensity = 22;
+    slot.light.visible = true;
     slot.t = 1;
 
     this.bursts++;
@@ -201,14 +205,16 @@ export class Fireworks {
       const y = 1.4 + Math.random() * 3.6;
       const z = -6.5 - Math.random() * 3;
       this.burst(x, y, z);
-      this.nextBurst = 0.4 + Math.random() * 0.65;
+      this.nextBurst = 3.0 + Math.random() * 2.2;
     }
 
+    let hasActive = false;
     for (let i = 0; i < this.max; i++) {
       if (this.life[i] >= this.maxLife[i]) {
         this.positions[i * 3 + 1] = -999;
         continue;
       }
+      hasActive = true;
       this.life[i] += dt;
       const i3 = i * 3;
       this.positions[i3] += this.vel[i3] * dt;
@@ -223,15 +229,18 @@ export class Fireworks {
       if (k < 0.15) this.positions[i3 + 1] = -999;
     }
 
-    this.points.geometry.attributes.position.needsUpdate = true;
-    this.points.geometry.attributes.color.needsUpdate = true;
+    if (hasActive) {
+      this.points.geometry.attributes.position.needsUpdate = true;
+    }
 
     for (const slot of this.poolLights) {
       if (slot.t > 0) {
-        slot.t -= dt * 2.2;
-        slot.light.intensity = Math.max(0, slot.t * 28);
+        slot.t -= dt * 2.4;
+        slot.light.intensity = Math.max(0, slot.t * 22);
+        slot.light.visible = true;
       } else {
         slot.light.intensity = 0;
+        slot.light.visible = false;
       }
     }
   }
