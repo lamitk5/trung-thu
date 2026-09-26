@@ -4,6 +4,8 @@
  * Self-contained: builds its own DOM, manages animation loops, cleans up on exit.
  */
 
+import { playFireworkExplosion, playRocketWhistle } from "./audio.js?v=4";
+
 // ── Wish pool ──────────────────────────────────────────────────────────────────
 const WISHES = [
   "Chúc bạn mùa trăng ngập tràn hạnh phúc! 🌕💖",
@@ -603,7 +605,7 @@ export class WishesScene {
         // Burst at apex
         if (r.vy >= 0 || r.y < r.burstY) {
           this._burst(r.x, r.y, r.palette);
-          this._playPop();
+          if (this.soundOn) playFireworkExplosion({ volume: 0.95 });
           this.rockets.splice(i, 1);
         }
       }
@@ -644,6 +646,7 @@ export class WishesScene {
   }
 
   _launchRocket(rx, ry) {
+    if (this.soundOn) playRocketWhistle();
     const w = this.canvas.width;
     const h = this.canvas.height;
     const startX = w * (0.3 + Math.random() * 0.4);
@@ -729,22 +732,6 @@ export class WishesScene {
   // ── Audio ─────────────────────────────────────────────────────────────────────
   _playPop() {
     if (!this.soundOn) return;
-    try {
-      if (!this._audioCtx) this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const ctx = this._audioCtx;
-      const o   = ctx.createOscillator();
-      const g   = ctx.createGain();
-      o.connect(g);
-      g.connect(ctx.destination);
-
-      // Randomize between a few bright tones
-      const tones = [880, 1046, 1174, 1318, 1568];
-      o.frequency.value = tones[Math.floor(Math.random() * tones.length)];
-      o.type = 'sine';
-      g.gain.setValueAtTime(0.08, ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
-      o.start(ctx.currentTime);
-      o.stop(ctx.currentTime + 0.18);
-    } catch (_) {}
+    playFireworkExplosion({ volume: 0.95 });
   }
 }

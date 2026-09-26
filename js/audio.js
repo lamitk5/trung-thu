@@ -197,3 +197,144 @@ export function playWoodLatch() {
   }
 }
 
+/**
+ * Realistic Firework Aerial Burst Sound ("Tiếng pháo hoa nổ ĐÙNG... rào rào ngoài đời thực")
+ * Multi-layer acoustic synthesis:
+ * 1. Deep Sub-bass Shockwave (ĐÙNG!! - 140Hz -> 32Hz heavy exponential drop + punchy transient)
+ * 2. Gunpowder Noise Blast (Khùng... - Swept bandpass/lowpass filtered noise)
+ * 3. Distance Atmosphere Rumble (Âm rền bầu trời đêm)
+ * 4. Micro Sparks Crackle / Sizzle Tail (Tiếng rào rào, tí tách tia lửa)
+ */
+export function playFireworkExplosion(options = {}) {
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  const now = ctx.currentTime;
+  const vol = (options.volume || 1.0) * 0.95;
+
+  const master = ctx.createGain();
+  master.gain.setValueAtTime(vol, now);
+  master.connect(ctx.destination);
+
+  // ── 1. The Deep Shockwave Boom ("ĐÙNG!!") ──
+  const boom = ctx.createOscillator();
+  const boomGain = ctx.createGain();
+  boom.type = "sine";
+  const startFreq = 135 + Math.random() * 30; // 135 - 165 Hz
+  const endFreq = 28 + Math.random() * 8;     // 28 - 36 Hz
+  boom.frequency.setValueAtTime(startFreq, now);
+  boom.frequency.exponentialRampToValueAtTime(endFreq, now + 0.36);
+
+  boomGain.gain.setValueAtTime(0.001, now);
+  boomGain.gain.linearRampToValueAtTime(0.9, now + 0.006);
+  boomGain.gain.exponentialRampToValueAtTime(0.001, now + 0.82);
+
+  boom.connect(boomGain);
+  boomGain.connect(master);
+  boom.start(now);
+  boom.stop(now + 0.85);
+
+  // ── 2. The Explosive Gunpowder Blast ("KHÙNG...") ──
+  const bufferLen = Math.floor(ctx.sampleRate * 0.55);
+  const noiseBuffer = ctx.createBuffer(1, bufferLen, ctx.sampleRate);
+  const noiseData = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < bufferLen; i++) {
+    noiseData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.22));
+  }
+
+  const noise = ctx.createBufferSource();
+  noise.buffer = noiseBuffer;
+
+  const noiseFilter = ctx.createBiquadFilter();
+  noiseFilter.type = "lowpass";
+  noiseFilter.frequency.setValueAtTime(950 + Math.random() * 300, now);
+  noiseFilter.frequency.exponentialRampToValueAtTime(130, now + 0.45);
+
+  const noiseGain = ctx.createGain();
+  noiseGain.gain.setValueAtTime(0.001, now);
+  noiseGain.gain.linearRampToValueAtTime(0.75, now + 0.01);
+  noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.52);
+
+  noise.connect(noiseFilter);
+  noiseFilter.connect(noiseGain);
+  noiseGain.connect(master);
+  noise.start(now);
+
+  // ── 3. Atmospheric Night Sky Rumble Tail (Âm rền lan tỏa) ──
+  const rumble = ctx.createOscillator();
+  const rumbleGain = ctx.createGain();
+  rumble.type = "triangle";
+  rumble.frequency.setValueAtTime(58, now);
+  rumble.frequency.exponentialRampToValueAtTime(24, now + 1.3);
+
+  rumbleGain.gain.setValueAtTime(0.001, now);
+  rumbleGain.gain.linearRampToValueAtTime(0.38, now + 0.05);
+  rumbleGain.gain.exponentialRampToValueAtTime(0.001, now + 1.4);
+
+  rumble.connect(rumbleGain);
+  rumbleGain.connect(master);
+  rumble.start(now + 0.02);
+  rumble.stop(now + 1.45);
+
+  // ── 4. Sizzling Star Crackles ("Rào rào... tí tách") ──
+  const numCrackles = 6 + Math.floor(Math.random() * 6);
+  for (let j = 0; j < numCrackles; j++) {
+    const crackleTime = now + 0.14 + Math.random() * 0.55;
+    const crackLen = Math.floor(ctx.sampleRate * 0.035);
+    const cBuffer = ctx.createBuffer(1, crackLen, ctx.sampleRate);
+    const cData = cBuffer.getChannelData(0);
+    for (let k = 0; k < crackLen; k++) {
+      cData[k] = (Math.random() * 2 - 1) * Math.exp(-k / (ctx.sampleRate * 0.007));
+    }
+    const cSource = ctx.createBufferSource();
+    cSource.buffer = cBuffer;
+
+    const cFilter = ctx.createBiquadFilter();
+    cFilter.type = "bandpass";
+    cFilter.frequency.setValueAtTime(1600 + Math.random() * 2400, crackleTime);
+    cFilter.Q.value = 3.2;
+
+    const cGain = ctx.createGain();
+    cGain.gain.setValueAtTime(0.18 + Math.random() * 0.14, crackleTime);
+    cGain.gain.exponentialRampToValueAtTime(0.001, crackleTime + 0.035);
+
+    cSource.connect(cFilter);
+    cFilter.connect(cGain);
+    cGain.connect(master);
+    cSource.start(crackleTime);
+  }
+}
+
+/**
+ * Pre-launch rocket whistle / whoosh ("Tiếng rít viuuuuu... phóng lên trời")
+ */
+export function playRocketWhistle() {
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  const now = ctx.currentTime;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  const filter = ctx.createBiquadFilter();
+
+  osc.type = "sawtooth";
+  osc.frequency.setValueAtTime(320 + Math.random() * 80, now);
+  osc.frequency.exponentialRampToValueAtTime(1100 + Math.random() * 300, now + 0.55);
+
+  filter.type = "bandpass";
+  filter.frequency.setValueAtTime(450, now);
+  filter.frequency.exponentialRampToValueAtTime(1400, now + 0.55);
+  filter.Q.value = 4.5;
+
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.linearRampToValueAtTime(0.08, now + 0.08);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.60);
+
+  osc.connect(filter);
+  filter.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start(now);
+  osc.stop(now + 0.62);
+}
+

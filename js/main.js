@@ -1,8 +1,8 @@
-import { PaperStage } from "./scene.js?v=15";
+import { PaperStage } from "./scene.js?v=16";
 import { TheaterUI } from "./ui.js?v=15";
 import { StardustPhoenix } from "./phoenix.js?v=10";
-import { playFairyChime, playWoodLatch } from "./audio.js?v=3";
-import { WishesScene } from "./wishes-scene.js?v=7";
+import { playFairyChime, playWoodLatch, playFireworkExplosion } from "./audio.js?v=4";
+import { WishesScene } from "./wishes-scene.js?v=8";
 
 const gsap = window.gsap;
 if (!gsap) {
@@ -51,6 +51,7 @@ const ui = new TheaterUI({
             1.5 + Math.random() * 2.5,
             -7
           );
+          playFireworkExplosion({ volume: 0.75 });
           phoenix.triggerStardustBurst(35);
         });
       }

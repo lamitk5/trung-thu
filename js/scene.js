@@ -19,6 +19,7 @@ import {
 } from "./textures.js?v=14";
 
 import { Fireflies, Embers, Fireworks } from "./particles.js?v=11";
+import { playFireworkExplosion } from "./audio.js?v=4";
 
 function canvasTex(canvas) {
   const tex = new THREE.CanvasTexture(canvas);
@@ -646,6 +647,7 @@ export class PaperStage {
     const dist = (-6.5 - this.camera.position.z) / dir.z;
     const pos = this.camera.position.clone().add(dir.multiplyScalar(dist));
     this.fireworks.burst(pos.x, pos.y, pos.z);
+    playFireworkExplosion({ volume: 0.85 });
   }
 
   /** GSAP-driven intro camera zoom and orientation without fighting update() */
@@ -766,6 +768,7 @@ export class PaperStage {
 
     // 1–2 burst cluster for a richer effect
     this.fireworks.burst(worldPos.x, worldPos.y, worldPos.z);
+    playFireworkExplosion({ volume: 0.85 });
     if (Math.random() < 0.55) {
       setTimeout(() => {
         this.fireworks.burst(
@@ -773,6 +776,7 @@ export class PaperStage {
           worldPos.y + (Math.random() - 0.5) * 0.8,
           worldPos.z
         );
+        playFireworkExplosion({ volume: 0.7 });
       }, 120 + Math.random() * 100);
     }
   }
