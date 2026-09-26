@@ -1,7 +1,7 @@
 import { PaperStage } from "./scene.js?v=17";
 import { TheaterUI } from "./ui.js?v=15";
 import { StardustPhoenix } from "./phoenix.js?v=11";
-import { playFairyChime, playWoodLatch, playFireworkExplosion } from "./audio.js?v=4";
+import { playFairyChime, playWoodLatch, playFireworkExplosion } from "./audio.js?v=5";
 import { WishesScene } from "./wishes-scene.js?v=9";
 
 const gsap = window.gsap;

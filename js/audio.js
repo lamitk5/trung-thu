@@ -18,6 +18,76 @@ function getAudioContext() {
   return audioCtx;
 }
 
+// ── Authentic Recorded Firework Audio Buffers ─────────────────────────────────
+const audioBuffers = {};
+const AUDIO_SOURCES = {
+  burst1: './assets/audio/burst1.mp3',
+  burst2: './assets/audio/burst2.mp3',
+  burstSm: './assets/audio/burst-sm-1.mp3',
+  crackle: './assets/audio/crackle1.mp3',
+  lift1: './assets/audio/lift1.mp3',
+  lift2: './assets/audio/lift2.mp3',
+  lift3: './assets/audio/lift3.mp3',
+};
+
+let preloaded = false;
+export function preloadFireworkSounds() {
+  const ctx = getAudioContext();
+  if (!ctx || preloaded) return;
+  preloaded = true;
+
+  for (const [name, url] of Object.entries(AUDIO_SOURCES)) {
+    fetch(url)
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.arrayBuffer();
+      })
+      .then((data) => ctx.decodeAudioData(data))
+      .then((decoded) => {
+        audioBuffers[name] = decoded;
+      })
+      .catch((err) => {
+        console.warn(`[Audio] Notice: loading ${name}:`, err.message);
+      });
+  }
+}
+
+// Unmute & Preload instantly on first user gesture
+if (typeof window !== 'undefined') {
+  const onUserGesture = () => {
+    getAudioContext();
+    preloadFireworkSounds();
+    window.removeEventListener('pointerdown', onUserGesture);
+    window.removeEventListener('touchstart', onUserGesture);
+    window.removeEventListener('keydown', onUserGesture);
+  };
+  window.addEventListener('pointerdown', onUserGesture, { passive: true });
+  window.addEventListener('touchstart', onUserGesture, { passive: true });
+  window.addEventListener('keydown', onUserGesture, { passive: true });
+}
+
+function playBuffer(buffer, { volume = 1.0, playbackRate = 1.0 } = {}) {
+  const ctx = getAudioContext();
+  if (!ctx || !buffer) return false;
+
+  try {
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.playbackRate.value = playbackRate;
+
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = Math.max(0, Math.min(2.0, volume));
+
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    source.start(0);
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
 /**
  * Play a cascading crystal chime arpeggio (fairy magic chime)
  */
@@ -198,14 +268,64 @@ export function playWoodLatch() {
 }
 
 /**
- * Realistic Firework Aerial Burst Sound ("Tiếng pháo hoa nổ ĐÙNG... rào rào ngoài đời thực")
- * Multi-layer acoustic synthesis:
- * 1. Deep Sub-bass Shockwave (ĐÙNG!! - 140Hz -> 32Hz heavy exponential drop + punchy transient)
- * 2. Gunpowder Noise Blast (Khùng... - Swept bandpass/lowpass filtered noise)
- * 3. Distance Atmosphere Rumble (Âm rền bầu trời đêm)
- * 4. Micro Sparks Crackle / Sizzle Tail (Tiếng rào rào, tí tách tia lửa)
+ * Realistic Firework Aerial Burst Sound (Real Recorded Audio)
+ * Randomizes between authentic explosion recordings (burst1, burst2, burstSm)
+ * with organic pitch variation and real sizzling star crackles.
  */
 export function playFireworkExplosion(options = {}) {
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  preloadFireworkSounds();
+  const vol = (options.volume || 1.0) * 0.95;
+
+  const bursts = ['burst1', 'burst2', 'burstSm'];
+  const name = bursts[Math.floor(Math.random() * bursts.length)];
+  const buffer = audioBuffers[name];
+
+  const rate = 0.94 + Math.random() * 0.12; // 0.94 - 1.06 pitch variance for organic feel
+  const played = playBuffer(buffer, { volume: vol, playbackRate: rate });
+
+  // Add authentic sizzling crackle tail (70% chance)
+  if (Math.random() < 0.70 && audioBuffers.crackle) {
+    setTimeout(() => {
+      playBuffer(audioBuffers.crackle, {
+        volume: vol * 0.65,
+        playbackRate: 0.96 + Math.random() * 0.08,
+      });
+    }, 240 + Math.random() * 120);
+  }
+
+  // Graceful fallback to procedural synthesis if file is still downloading
+  if (!played) {
+    playProceduralFireworkExplosion(options);
+  }
+}
+
+/**
+ * Pre-launch rocket whistle / whoosh (Real Recorded Audio)
+ * Randomizes between real rocket lift recordings (lift1, lift2, lift3).
+ */
+export function playRocketWhistle() {
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  preloadFireworkSounds();
+
+  const lifts = ['lift1', 'lift2', 'lift3'];
+  const name = lifts[Math.floor(Math.random() * lifts.length)];
+  const buffer = audioBuffers[name];
+
+  const rate = 0.95 + Math.random() * 0.10;
+  const played = playBuffer(buffer, { volume: 0.8, playbackRate: rate });
+
+  if (!played) {
+    playProceduralRocketWhistle();
+  }
+}
+
+// ── Fallback Procedural Audio Synthesizers (Offline / Zero-latency) ─────────────
+function playProceduralFireworkExplosion(options = {}) {
   const ctx = getAudioContext();
   if (!ctx) return;
 
@@ -216,12 +336,12 @@ export function playFireworkExplosion(options = {}) {
   master.gain.setValueAtTime(vol, now);
   master.connect(ctx.destination);
 
-  // ── 1. The Deep Shockwave Boom ("ĐÙNG!!") ──
+  // 1. The Deep Shockwave Boom
   const boom = ctx.createOscillator();
   const boomGain = ctx.createGain();
   boom.type = "sine";
-  const startFreq = 135 + Math.random() * 30; // 135 - 165 Hz
-  const endFreq = 28 + Math.random() * 8;     // 28 - 36 Hz
+  const startFreq = 135 + Math.random() * 30;
+  const endFreq = 28 + Math.random() * 8;
   boom.frequency.setValueAtTime(startFreq, now);
   boom.frequency.exponentialRampToValueAtTime(endFreq, now + 0.36);
 
@@ -234,7 +354,7 @@ export function playFireworkExplosion(options = {}) {
   boom.start(now);
   boom.stop(now + 0.85);
 
-  // ── 2. The Explosive Gunpowder Blast ("KHÙNG...") ──
+  // 2. Gunpowder Blast
   const bufferLen = Math.floor(ctx.sampleRate * 0.55);
   const noiseBuffer = ctx.createBuffer(1, bufferLen, ctx.sampleRate);
   const noiseData = noiseBuffer.getChannelData(0);
@@ -259,56 +379,9 @@ export function playFireworkExplosion(options = {}) {
   noiseFilter.connect(noiseGain);
   noiseGain.connect(master);
   noise.start(now);
-
-  // ── 3. Atmospheric Night Sky Rumble Tail (Âm rền lan tỏa) ──
-  const rumble = ctx.createOscillator();
-  const rumbleGain = ctx.createGain();
-  rumble.type = "triangle";
-  rumble.frequency.setValueAtTime(58, now);
-  rumble.frequency.exponentialRampToValueAtTime(24, now + 1.3);
-
-  rumbleGain.gain.setValueAtTime(0.001, now);
-  rumbleGain.gain.linearRampToValueAtTime(0.38, now + 0.05);
-  rumbleGain.gain.exponentialRampToValueAtTime(0.001, now + 1.4);
-
-  rumble.connect(rumbleGain);
-  rumbleGain.connect(master);
-  rumble.start(now + 0.02);
-  rumble.stop(now + 1.45);
-
-  // ── 4. Sizzling Star Crackles ("Rào rào... tí tách") ──
-  const numCrackles = 6 + Math.floor(Math.random() * 6);
-  for (let j = 0; j < numCrackles; j++) {
-    const crackleTime = now + 0.14 + Math.random() * 0.55;
-    const crackLen = Math.floor(ctx.sampleRate * 0.035);
-    const cBuffer = ctx.createBuffer(1, crackLen, ctx.sampleRate);
-    const cData = cBuffer.getChannelData(0);
-    for (let k = 0; k < crackLen; k++) {
-      cData[k] = (Math.random() * 2 - 1) * Math.exp(-k / (ctx.sampleRate * 0.007));
-    }
-    const cSource = ctx.createBufferSource();
-    cSource.buffer = cBuffer;
-
-    const cFilter = ctx.createBiquadFilter();
-    cFilter.type = "bandpass";
-    cFilter.frequency.setValueAtTime(1600 + Math.random() * 2400, crackleTime);
-    cFilter.Q.value = 3.2;
-
-    const cGain = ctx.createGain();
-    cGain.gain.setValueAtTime(0.18 + Math.random() * 0.14, crackleTime);
-    cGain.gain.exponentialRampToValueAtTime(0.001, crackleTime + 0.035);
-
-    cSource.connect(cFilter);
-    cFilter.connect(cGain);
-    cGain.connect(master);
-    cSource.start(crackleTime);
-  }
 }
 
-/**
- * Pre-launch rocket whistle / whoosh ("Tiếng rít viuuuuu... phóng lên trời")
- */
-export function playRocketWhistle() {
+function playProceduralRocketWhistle() {
   const ctx = getAudioContext();
   if (!ctx) return;
 

@@ -19,7 +19,7 @@ import {
 } from "./textures.js?v=14";
 
 import { Fireflies, Embers, Fireworks } from "./particles.js?v=12";
-import { playFireworkExplosion } from "./audio.js?v=4";
+import { playFireworkExplosion } from "./audio.js?v=5";
 
 function canvasTex(canvas) {
   const tex = new THREE.CanvasTexture(canvas);

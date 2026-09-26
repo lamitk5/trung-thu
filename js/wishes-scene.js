@@ -4,7 +4,7 @@
  * Self-contained: builds its own DOM, manages animation loops, cleans up on exit.
  */
 
-import { playFireworkExplosion, playRocketWhistle } from "./audio.js?v=4";
+import { playFireworkExplosion, playRocketWhistle } from "./audio.js?v=5";
 
 // ── Wish pool ──────────────────────────────────────────────────────────────────
 const WISHES = [
