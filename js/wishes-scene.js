@@ -4,7 +4,7 @@
  * Self-contained: builds its own DOM, manages animation loops, cleans up on exit.
  */
 
-import { playFireworkExplosion, playRocketWhistle } from "./audio.js?v=5";
+import { playFireworkExplosion, playRocketWhistle, playFireworkBarrage } from "./audio.js?v=6";
 
 // ── Wish pool ──────────────────────────────────────────────────────────────────
 const WISHES = [
@@ -384,6 +384,7 @@ export class WishesScene {
 
     // Fireworks barrage button
     this.view.querySelector('#wgv-btn-fw').addEventListener('click', () => {
+      if (this.soundOn) playFireworkBarrage({ volume: 0.9 });
       for (let i = 0; i < 7; i++) {
         setTimeout(() => this._launchRocket(
           0.12 + Math.random() * 0.76,

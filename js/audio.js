@@ -21,6 +21,11 @@ function getAudioContext() {
 // ── Authentic Recorded Firework Audio Buffers ─────────────────────────────────
 const audioBuffers = {};
 const AUDIO_SOURCES = {
+  ytBurst1: './assets/audio/yt_burst1.mp3',
+  ytBurst2: './assets/audio/yt_burst2.mp3',
+  ytBurst3: './assets/audio/yt_burst3.mp3',
+  ytBurst4: './assets/audio/yt_burst4.mp3',
+  ytBarrage: './assets/audio/yt_barrage.mp3',
   burst1: './assets/audio/burst1.mp3',
   burst2: './assets/audio/burst2.mp3',
   burstSm: './assets/audio/burst-sm-1.mp3',
@@ -279,27 +284,58 @@ export function playFireworkExplosion(options = {}) {
   preloadFireworkSounds();
   const vol = (options.volume || 1.0) * 0.95;
 
-  const bursts = ['burst1', 'burst2', 'burstSm'];
+  // Prioritize the authentic YouTube firework explosion bursts
+  const bursts = ['ytBurst1', 'ytBurst2', 'ytBurst3', 'ytBurst4', 'burst1', 'burstSm'];
   const name = bursts[Math.floor(Math.random() * bursts.length)];
-  const buffer = audioBuffers[name];
+  const buffer = audioBuffers[name] || audioBuffers.ytBurst1 || audioBuffers.burst1;
 
-  const rate = 0.94 + Math.random() * 0.12; // 0.94 - 1.06 pitch variance for organic feel
+  const rate = 0.95 + Math.random() * 0.10; // 0.95 - 1.05 pitch variance for organic feel
   const played = playBuffer(buffer, { volume: vol, playbackRate: rate });
 
-  // Add authentic sizzling crackle tail (70% chance)
-  if (Math.random() < 0.70 && audioBuffers.crackle) {
+  // Add occasional real crackle tail
+  if (Math.random() < 0.45 && audioBuffers.crackle) {
     setTimeout(() => {
       playBuffer(audioBuffers.crackle, {
-        volume: vol * 0.65,
+        volume: vol * 0.5,
         playbackRate: 0.96 + Math.random() * 0.08,
       });
-    }, 240 + Math.random() * 120);
+    }, 280 + Math.random() * 120);
   }
 
   // Graceful fallback to procedural synthesis if file is still downloading
   if (!played) {
     playProceduralFireworkExplosion(options);
   }
+}
+
+let barrageNode = null;
+/**
+ * Play the full 18-second authentic New Year's Eve firework barrage audio from YouTube
+ */
+export function playFireworkBarrage({ volume = 0.85 } = {}) {
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  preloadFireworkSounds();
+  if (!audioBuffers.ytBarrage) return;
+
+  if (barrageNode) {
+    try { barrageNode.stop(); } catch (_) {}
+    barrageNode = null;
+  }
+
+  try {
+    barrageNode = ctx.createBufferSource();
+    barrageNode.buffer = audioBuffers.ytBarrage;
+
+    const gain = ctx.createGain();
+    gain.gain.value = volume;
+
+    barrageNode.connect(gain);
+    gain.connect(ctx.destination);
+
+    barrageNode.start(0);
+  } catch (_) {}
 }
 
 /**
